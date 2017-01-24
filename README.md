@@ -3,11 +3,6 @@ Use Sublime Text to write in your browser. Everything you type in the editor wil
 
 More information on the [main <img alt="GhostText" src="https://raw.githubusercontent.com/Cacodaimon/GhostText-for-Chrome/master/promo/gt_banner.png" height="20px" valign="-5px"> repo](https://github.com/GhostText/GhostText)
  
-## Installation
-
-0. Install the editor extension: [for Sublime Text](https://sublime.wbond.net/packages/GhostText) or [for Atom](https://github.com/GhostText/GhostText-for-Atom)
-1. Install the browser extension: [for Chrome](https://chrome.google.com/webstore/detail/sublimetextarea/godiecgffnchndlihlpaajjcplehddca) or [for Firefox](https://addons.mozilla.org/firefox/addon/ghosttext-for-firefox/)
-
 ### Installation suggestions
 
 * An improved markdown syntax [MarkdownEditing](https://sublime.wbond.net/packages/MarkdownEditing)
