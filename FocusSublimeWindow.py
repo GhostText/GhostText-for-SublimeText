@@ -4,13 +4,19 @@ import subprocess
 from sublime_plugin import WindowCommand
 
 
+NATIVE_FOCUS_WINDOW = int(sublime.version()) >= 4000
+
+
 class FocusSublimeWindowCommand(WindowCommand):
     """
-    Focuses the SublimeText window using a OS specific shell command.
+    Focuses the SublimeText window.
     """
     def run(self, **args):
-        platform = sublime.platform()
+        if NATIVE_FOCUS_WINDOW:
+            self.window.bring_to_front()
+            return
 
+        platform = sublime.platform()
         if platform == 'linux':
             os.system('sh -c "xdotool windowactivate $(xdotool search --class sublime | tail -1)"')
         elif platform == 'osx':
