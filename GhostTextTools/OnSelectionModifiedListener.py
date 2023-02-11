@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 import sublime
 from sublime_plugin import EventListener
 import json
@@ -8,9 +10,14 @@ class OnSelectionModifiedListener(EventListener):
     Handles content changes, each changes gets send with the given web socket server to the client.
     """
     _bind_views = {}
+    _disabled = set()
 
     def on_selection_modified(self, view):
-        if view.id() not in OnSelectionModifiedListener._bind_views:
+        vid = view.id()
+        if (
+            vid not in OnSelectionModifiedListener._bind_views
+            or vid in self._disabled
+        ):
             return
 
         changed_text = view.substr(sublime.Region(0, view.size()))
@@ -23,6 +30,16 @@ class OnSelectionModifiedListener(EventListener):
         })
 
         OnSelectionModifiedListener._bind_views[view.id()].send_message(response)
+
+    @classmethod
+    @contextmanager
+    def disabled(cls, view):
+        vid = view.id()
+        cls._disabled.add(vid)
+        try:
+            yield
+        finally:
+            cls._disabled.remove(vid)
 
     def on_close(self, view):
         if view.id() not in OnSelectionModifiedListener._bind_views:

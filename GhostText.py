@@ -121,8 +121,9 @@ class OnMessage(AbstractOnMessage):
     def on_message(self, text):
         try:
             request = json.loads(text)
-            self._current_view.run_command('replace_content', request)
-            self._current_view.window().focus_view(self._current_view)
+            with OnSelectionModifiedListener.disabled(self._current_view):
+                self._current_view.run_command('replace_content', request)
+                self._current_view.window().focus_view(self._current_view)
         except ValueError as e:
             Utils.show_error(e, 'Invalid JSON')
 
