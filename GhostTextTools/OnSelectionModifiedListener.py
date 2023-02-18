@@ -57,6 +57,15 @@ class OnSelectionModifiedListener(EventListener):
         print("Bind view with id: {}".format(view.id()))
         OnSelectionModifiedListener._bind_views[view.id()] = web_socket_server
 
+    @classmethod
+    def unbind_all_views(cls):
+        """
+        Close all websocket servers.
+        """
+        for vid, server in cls._bind_views.items():
+            server.initiate_close()
+        cls._bind_views.clear()
+
     @staticmethod
     def unbind_view(view):
         """

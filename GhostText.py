@@ -170,3 +170,4 @@ def plugin_unloaded():
         return
 
     GhostTextGlobals.http_status_server_thread.stop()
+    OnSelectionModifiedListener.unbind_all_views()
