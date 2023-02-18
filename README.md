@@ -10,5 +10,8 @@ Install it from [Package Control](https://packagecontrol.io/packages/GhostText)
 ### Installation suggestions
 
 * An improved markdown syntax [MarkdownEditing](https://sublime.wbond.net/packages/MarkdownEditing)
+
+If you still have Sublime Text 3 then:
+
 * On Linux, [xdotool](http://www.semicomplete.com/projects/xdotool/) lets GhostText focus your Sublime Text window on a new connection.
 * On Windows, [nircmd](http://www.nirsoft.net/utils/nircmd.html) in `C:/Windows/`, lets GhostText focus your Sublime Text window on a new connection.
