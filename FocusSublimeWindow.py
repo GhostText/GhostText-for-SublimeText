@@ -4,7 +4,7 @@ import subprocess
 from sublime_plugin import WindowCommand
 
 
-NATIVE_FOCUS_WINDOW = int(sublime.version()) >= 4000
+NATIVE_FOCUS_WINDOW = int(sublime.version()) >= 4067
 
 
 class FocusSublimeWindowCommand(WindowCommand):
