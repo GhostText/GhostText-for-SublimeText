@@ -14,7 +14,6 @@ class FocusSublimeWindowCommand(WindowCommand):
     def run(self, **args):
         if NATIVE_FOCUS_WINDOW:
             self.window.bring_to_front()
-            return
 
         platform = sublime.platform()
         if platform == 'linux':
@@ -26,5 +25,11 @@ class FocusSublimeWindowCommand(WindowCommand):
             end tell
             """  # Brings ALL the windows forward
             subprocess.Popen(["osascript", "-e", script])
-        elif platform == 'windows':  # needs http://www.nirsoft.net/utils/nircmd.html to be installed in windows dir
-            subprocess.Popen('nircmd win activate process sublime_text.exe')
+        elif platform == 'windows':
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            subprocess.Popen(
+                'powershell -Command (New-Object -ComObject WScript.Shell).AppActivate({})'
+                .format(os.getppid()),
+                startupinfo=startupinfo
+            )
