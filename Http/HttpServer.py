@@ -29,6 +29,10 @@ class HttpServer:
                 request = self._recv_all()
                 if len(request) > 0:
                     request = self._parse_request(request)
+                    # Ignore invalid requests
+                    if request is None:
+                        self._conn.close()
+                        continue
                     response = self._on_request_handler.on_request(request)
                     self._conn.sendall(bytes(self._build_response(response), 'utf-8'))
                 self._conn.close()
@@ -104,6 +108,13 @@ class HttpServer:
         for header in headers_temp:
             key, value = header.split(": ")
             request_headers[key] = value
+
+        # Only allow requests originating from a web extension’s background page
+        # The origin header is usually missing, but if a webpage tries to make a request, it will be present
+        if 'Origin' in request_headers:
+            if not request_headers['Origin'].endswith('extension:'):
+                print('Invalid request origin: {}'.format(request_headers['Origin']))
+                return None
 
         return Request(request_method, request_uri, http_version, request_headers, raw_data)
 

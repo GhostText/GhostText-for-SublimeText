@@ -38,7 +38,6 @@ class WebSocketServer:
         """
         Starts the server,
         """
-        print('Start')
         self._socket.listen(1)
         self._port = self._socket.getsockname()[1]
         print('Listening on: {}'.format(self._port))
