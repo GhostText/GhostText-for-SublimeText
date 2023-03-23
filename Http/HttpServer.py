@@ -31,6 +31,7 @@ class HttpServer:
                     request = self._parse_request(request)
                     # Ignored invalid requests
                     if request is None:
+                        self._conn.close()
                         continue
                     response = self._on_request_handler.on_request(request)
                     self._conn.sendall(bytes(self._build_response(response), 'utf-8'))
