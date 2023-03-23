@@ -64,11 +64,11 @@ class HttpStatusServerThread(Thread):
         handler.new_window_on_connect = bool(settings.get('new_window_on_connect', False))
         handler.window_command_on_connect = str(settings.get('window_command_on_connect', 'focus_sublime_window'))
         self._server = socketserver.TCPServer(("", server_port), OnRequest)
+        Utils.show_status('Ready on port ' + str(server_port))
 
     def run(self):
         try:
             self._server.serve_forever()
-            Utils.show_status('GhostText ready on port ' + str(self._server.get_port()))
         except OSError as e:
             Utils.show_error(e, 'HttpStatusServerThread')
             raise e
