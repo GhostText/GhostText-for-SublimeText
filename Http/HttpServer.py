@@ -29,7 +29,7 @@ class HttpServer:
                 request = self._recv_all()
                 if len(request) > 0:
                     request = self._parse_request(request)
-                    # Ignored invalid requests
+                    # Ignore invalid requests
                     if request is None:
                         self._conn.close()
                         continue
