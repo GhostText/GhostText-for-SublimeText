@@ -105,6 +105,13 @@ class HttpServer:
             key, value = header.split(": ")
             request_headers[key] = value
 
+        # Only allow requests originating from a web extension’s background page
+        # The origin header is usually missing, but if a webpage tries to make a request, it will be present
+        if 'Origin' in request_headers:
+            if not request_headers['Origin'].endswith('extension:'):
+                print('Invalid request origin: {}'.format(request_headers['Origin']))
+                return None
+
         return Request(request_method, request_uri, http_version, request_headers, raw_data)
 
     def _build_response(self, response):
