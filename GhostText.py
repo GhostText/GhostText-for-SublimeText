@@ -1,12 +1,11 @@
 __author__ = 'Guido Krömer'
 __license__ = 'MIT'
+__version__ = '0.2'
 __email__ = 'mail 64 cacodaemon 46 de'
 
 import sublime
 import http.server
 import socketserver
-import websockets
-
 from sublime import Window
 from sublime_plugin import TextCommand
 from sublime_plugin import EventListener
@@ -20,42 +19,13 @@ from .GhostTextTools.OnSelectionModifiedListener import OnSelectionModifiedListe
 from .GhostTextTools.WindowHelper import WindowHelper
 from .GhostTextTools.Utils import Utils
 
-class WebSocketServerThread(threading.Thread):
-    def __init__(self, settings):
-        super().__init__()
-        self._server = None
-        self._settings = settings
-        self._on_message = None
-        self._on_close = None
 
-    def run(self):
-        def websocket_handler(websocket, path):
-            while True:
-                message = websocket.recv()
-                if self._on_message is not None:
-                    self._on_message(message)
-
-        self._server = websockets.serve(websocket_handler, 'localhost', 0)
-        self._server_loop = websockets.server.serve_forever(self._server)
-
-    def get_server(self):
-        return self._server
-
-    def stop(self):
-        if self._server is not None:
-            self._server_loop.stop()
-            self._server.close()
-
-    def on_message(self, handler):
-        self._on_message = handler
-
-    def on_close(self, handler):
-        self._on_close = handler
-
-class OldWebSocketServerThread(Thread):
+class WebSocketServerThread(Thread):
     def __init__(self, settings):
         super().__init__()
         self._server = WebSocketServer('localhost', 0)
+        self._server.on_message(OnConnect(settings))
+        self._server.on_close(OnClose(settings))
 
     def run(self):
         self._server.start()
@@ -72,10 +42,6 @@ class OnRequest(http.server.SimpleHTTPRequestHandler):
             sublime.active_window().run_command(self.window_command_on_connect)
 
         web_socket_server_thread = WebSocketServerThread(self._settings)
-
-        web_socket_server_thread.on_message(OnConnect(self._settings))
-        web_socket_server_thread.on_close(OnClose(self._settings))
-
         web_socket_server_thread.start()
         while not web_socket_server_thread.get_server().get_running():
             sleep(0.1)
