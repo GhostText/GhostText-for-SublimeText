@@ -21,9 +21,7 @@ Use Sublime Text to write in your browser. Everything you type in the editor wil
 ## Demo
 
 <img src="https://raw.githubusercontent.com/fregante/GhostText/d5273b134f88a96dd3a20bfeb09049bdbc5f8b70/promo/demo.gif" alt="Demo screencast">
- 
+
 ## Installation suggestions
 
-* An improved markdown syntax [MarkdownEditing](https://sublime.wbond.net/packages/MarkdownEditing)
-
-* On Linux, [xdotool](http://www.semicomplete.com/projects/xdotool/) lets GhostText focus your Sublime Text window on a new connection.
+- On Linux, [xdotool](http://www.semicomplete.com/projects/xdotool/) lets GhostText focus your Sublime Text window on a new connection.
