@@ -19,10 +19,11 @@ from .GhostTextTools.OnSelectionModifiedListener import OnSelectionModifiedListe
 from .GhostTextTools.WindowHelper import WindowHelper
 from .GhostTextTools.Utils import Utils
 
+
 class WebSocketServerThread(Thread):
     def __init__(self, settings):
         super().__init__()
-        self._server = WebSocketServer('localhost', 4001)
+        self._server = WebSocketServer('localhost', 0)
         self._server.on_message(OnConnect(settings))
         self._server.on_close(OnClose(settings))
 
@@ -32,9 +33,6 @@ class WebSocketServerThread(Thread):
     def get_server(self):
         return self._server
 
-    def get_socket(self):
-        return self._server._socket
-
 class OnRequest(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if len(sublime.windows()) == 0 or self.new_window_on_connect:
@@ -43,42 +41,30 @@ class OnRequest(http.server.SimpleHTTPRequestHandler):
         if len(self.window_command_on_connect) > 0:
             sublime.active_window().run_command(self.window_command_on_connect)
 
-        Utils.show_status('Connection opened')
-
-        settings = sublime.load_settings('GhostText.sublime-settings')
-        server_port = int(settings.get('server_port', 4001))
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
-        self.wfile.write(json.dumps({"WebSocketPort": server_port, "ProtocolVersion": 1}).encode())
-
-class MergedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    def socket(self, *args, **kwargs):
-        return self._socket
-
-    def __init__(self, host, port, handler_class):
-        settings = sublime.load_settings('GhostText.sublime-settings')
-        web_socket_server_thread = WebSocketServerThread(settings)
+        web_socket_server_thread = WebSocketServerThread(self._settings)
         web_socket_server_thread.start()
         while not web_socket_server_thread.get_server().get_running():
             sleep(0.1)
 
-        self.socket = web_socket_server_thread.get_socket()
+        port = web_socket_server_thread.get_server().get_port()
+        Utils.show_status('Connection opened')
 
-        super().__init__((host, port), handler_class)
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps({"WebSocketPort": port, "ProtocolVersion": 1}).encode())
 
 class HttpStatusServerThread(Thread):
     def __init__(self, settings):
         super().__init__()
-        server_port = settings.get('server_port', 4001)
+        server_port = int(settings.get('server_port', 4001))
 
         handler = OnRequest
         handler._settings = settings
         handler.new_window_on_connect = bool(settings.get('new_window_on_connect', False))
         handler.window_command_on_connect = str(settings.get('window_command_on_connect', 'focus_sublime_window'))
-
-        self._server = MergedTCPServer("", int(server_port), OnRequest)
-        Utils.show_status('Ready on port ' + server_port)
+        self._server = socketserver.TCPServer(("", server_port), OnRequest)
+        Utils.show_status('Ready on port ' + str(server_port))
 
     def run(self):
         try:
