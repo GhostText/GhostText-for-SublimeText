@@ -6,6 +6,7 @@ class Handshake:
     """
     Handles the WebSocket handshake.
     """
+
     def perform(self, data):
         """
         Parses the given request data and returns a matching response header.
@@ -33,9 +34,11 @@ class Handshake:
         """
         Builds the response header containing the given key.
         """
-        return str("HTTP/1.1 101 Switching Protocols\r\n" +
-                       "Upgrade: websocket\r\n" + 
-                       "Connection: Upgrade\r\n" + 
-                       "Sec-WebSocket-Accept: " + 
-                       key.decode('utf-8') + 
-                       "\r\n\r\n")
+        return str(
+            "HTTP/1.1 101 Switching Protocols\r\n"
+            + "Upgrade: websocket\r\n"
+            + "Connection: Upgrade\r\n"
+            + "Sec-WebSocket-Accept: "
+            + key.decode('utf-8')
+            + "\r\n\r\n"
+        )

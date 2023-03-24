@@ -33,6 +33,7 @@ class WebSocketServerThread(Thread):
     def get_server(self):
         return self._server
 
+
 class OnRequest(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if len(sublime.windows()) == 0 or self.new_window_on_connect:
@@ -52,7 +53,10 @@ class OnRequest(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
-        self.wfile.write(json.dumps({"WebSocketPort": port, "ProtocolVersion": 1}).encode())
+        self.wfile.write(
+            json.dumps({"WebSocketPort": port, "ProtocolVersion": 1}).encode()
+        )
+
 
 class HttpStatusServerThread(Thread):
     def __init__(self, settings):
@@ -61,8 +65,12 @@ class HttpStatusServerThread(Thread):
 
         handler = OnRequest
         handler._settings = settings
-        handler.new_window_on_connect = bool(settings.get('new_window_on_connect', False))
-        handler.window_command_on_connect = str(settings.get('window_command_on_connect', 'focus_sublime_window'))
+        handler.new_window_on_connect = bool(
+            settings.get('new_window_on_connect', False)
+        )
+        handler.window_command_on_connect = str(
+            settings.get('window_command_on_connect', 'focus_sublime_window')
+        )
         self._server = socketserver.TCPServer(("", server_port), OnRequest)
         Utils.show_status('Ready on port ' + str(server_port))
 
@@ -81,6 +89,7 @@ class ReplaceContentCommand(TextCommand):
     """
     Replaces the views complete text content.
     """
+
     def run(self, edit, **args):
         self.view.replace(edit, sublime.Region(0, self.view.size()), args['text'])
         text_length = len(args['text'])
@@ -102,7 +111,9 @@ class OnConnect(AbstractOnMessage):
             request = json.loads(text)
             window_helper = WindowHelper()
             syntax = Utils.get_syntax_by_host(request['url'])
-            current_view = window_helper.add_file(request['title'] + '.' + syntax, request['text'])
+            current_view = window_helper.add_file(
+                request['title'] + '.' + syntax, request['text']
+            )
             OnSelectionModifiedListener.bind_view(current_view, self._web_socket_server)
             self._web_socket_server.on_message(OnMessage(self._settings, current_view))
             current_view.window().focus_view(current_view)
@@ -128,10 +139,14 @@ class OnMessage(AbstractOnMessage):
 class OnClose(AbstractOnClose):
     def __init__(self, settings):
         self._settings = settings
-        self._close_view_on_disconnect = bool(settings.get('close_view_on_disconnect', False))
+        self._close_view_on_disconnect = bool(
+            settings.get('close_view_on_disconnect', False)
+        )
 
     def on_close(self):
-        view_id = OnSelectionModifiedListener.find_view_id_by_web_socket_server_id(self._web_socket_server)
+        view_id = OnSelectionModifiedListener.find_view_id_by_web_socket_server_id(
+            self._web_socket_server
+        )
         if view_id is not None:
             view = Utils.find_view_by_id(view_id)
             if view is not None:
@@ -140,14 +155,17 @@ class OnClose(AbstractOnClose):
         if self._close_view_on_disconnect:
             Utils.close_view_by_id(view_id)
 
-        OnSelectionModifiedListener.unbind_view_by_web_socket_server_id(self._web_socket_server)
+        OnSelectionModifiedListener.unbind_view_by_web_socket_server_id(
+            self._web_socket_server
+        )
         Utils.show_status('Connection closed')
 
 
-class GhostTextGlobals():
+class GhostTextGlobals:
     """
     'Namespace' for global vars.
     """
+
     http_status_server_thread = None
 
 

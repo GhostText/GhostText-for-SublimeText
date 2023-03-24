@@ -79,7 +79,7 @@ class WebSocketServer:
 
                 if offset > 0:
                     try:
-                        for offset_part in range(0, ceil(offset/4096)):
+                        for offset_part in range(0, ceil(offset / 4096)):
                             data.extend(self._conn.recv(4096))
                     except MemoryError as e:
                         print(str(e))
@@ -136,7 +136,6 @@ class WebSocketServer:
         self._conn.send(self._frame.close())
         self._close_frame_send = True
 
-
     def on_message(self, handler):
         """
         Sets the on message handler.
@@ -170,7 +169,6 @@ class WebSocketServer:
         Gets the server's id.
         """
         return self._id
-
 
     def _recv_all(self, chunk_size=4096):
         """
