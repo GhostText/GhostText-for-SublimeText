@@ -11,13 +11,16 @@ class FocusSublimeWindowCommand(WindowCommand):
     """
     Focuses the SublimeText window.
     """
+
     def run(self, **args):
         if NATIVE_FOCUS_WINDOW:
             self.window.bring_to_front()
 
         platform = sublime.platform()
         if platform == 'linux':
-            os.system('sh -c "xdotool windowactivate $(xdotool search --class sublime | tail -1)"')
+            os.system(
+                'sh -c "xdotool windowactivate $(xdotool search --class sublime | tail -1)"'
+            )
         elif platform == 'osx':
             script = """
             tell application "Sublime Text"
@@ -29,7 +32,8 @@ class FocusSublimeWindowCommand(WindowCommand):
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             subprocess.Popen(
-                'powershell -Command (New-Object -ComObject WScript.Shell).AppActivate({})'
-                .format(os.getppid()),
-                startupinfo=startupinfo
+                'powershell -Command (New-Object -ComObject WScript.Shell).AppActivate({})'.format(
+                    os.getppid()
+                ),
+                startupinfo=startupinfo,
             )

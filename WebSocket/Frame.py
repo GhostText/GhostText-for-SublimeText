@@ -1,8 +1,8 @@
-
 class Frame:
     """
     Parses and creates a WebSocket frame.
     """
+
     def __init__(self):
         self._payload_len = 0
         self._payload_start = 2
@@ -27,18 +27,22 @@ class Frame:
         if length <= 125:
             ret = bytearray([129, length])
         elif length > 65536:  # 64 bit length
-            ret = bytearray([129,
-                             127,
-                             (length >> 56) & 0xff,
-                             (length >> 48) & 0xff,
-                             (length >> 40) & 0xff,
-                             (length >> 32) & 0xff,
-                             (length >> 24) & 0xff,
-                             (length >> 16) & 0xff,
-                             (length >> 8) & 0xff,
-                             length & 0xff])
+            ret = bytearray(
+                [
+                    129,
+                    127,
+                    (length >> 56) & 0xFF,
+                    (length >> 48) & 0xFF,
+                    (length >> 40) & 0xFF,
+                    (length >> 32) & 0xFF,
+                    (length >> 24) & 0xFF,
+                    (length >> 16) & 0xFF,
+                    (length >> 8) & 0xFF,
+                    length & 0xFF,
+                ]
+            )
         else:  # 16bit length
-            ret = bytearray([129, 126, (length >> 8) & 0xff, length & 0xff])
+            ret = bytearray([129, 126, (length >> 8) & 0xFF, length & 0xFF])
 
         for byte in text.encode("utf-8"):
             ret.append(byte)
@@ -57,13 +61,16 @@ class Frame:
             self._mask_start += 2
             self._payload_start += 2
         elif self._payload_len == 127:  # 64 bit int length
-            self._payload_len = (data[2] << 56) + \
-                                (data[3] << 48) + \
-                                (data[4] << 40) + \
-                                (data[5] << 32) + \
-                                (data[6] << 24) + \
-                                (data[7] << 16) + \
-                                (data[8] << 8) + data[9]
+            self._payload_len = (
+                (data[2] << 56)
+                + (data[3] << 48)
+                + (data[4] << 40)
+                + (data[5] << 32)
+                + (data[6] << 24)
+                + (data[7] << 16)
+                + (data[8] << 8)
+                + data[9]
+            )
             self._mask_start += 8
             self._payload_start += 8
 
@@ -72,7 +79,7 @@ class Frame:
                 data[self._mask_start],
                 data[self._mask_start + 1],
                 data[self._mask_start + 2],
-                data[self._mask_start + 3]
+                data[self._mask_start + 3],
             ]
 
     def close(self):
@@ -89,13 +96,13 @@ class Frame:
         if self.mask:
             res = bytearray(self._payload_len)
             i = 0
-            for char in data[self._payload_start:]:
+            for char in data[self._payload_start :]:
                 res.append(char ^ self._mask_data[i % 4])
                 i += 1
 
             return res
 
-        return data[self._payload_start:]
+        return data[self._payload_start :]
 
     def get_payload_offset(self):
         """
@@ -133,9 +140,20 @@ class Frame:
 
     def __str__(self):
         lengths_frm = " maskStart: {}\n payloadStart: {}\n payloadLen: {}\n"
-        lengths = lengths_frm.format(self._mask_start, self._payload_start, self._payload_len)
+        lengths = lengths_frm.format(
+            self._mask_start, self._payload_start, self._payload_len
+        )
 
         flags_frm = " fin: {}\n continues: {}\n utf8: {}\n binary: {}\n terminate: {}\n ping: {}\n pong: {}\n mask: {}\n"
-        flags = flags_frm.format(self.fin, self.continues, self.utf8, self.binary, self.terminate, self.ping, self.pong, self.mask)
+        flags = flags_frm.format(
+            self.fin,
+            self.continues,
+            self.utf8,
+            self.binary,
+            self.terminate,
+            self.ping,
+            self.pong,
+            self.mask,
+        )
 
         return "Frame:\n" + lengths + flags

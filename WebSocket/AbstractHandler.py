@@ -1,7 +1,8 @@
-class AbstractHandler():
+class AbstractHandler:
     """
     Abstract on whatever handler.
     """
+
     def __init__(self):
         self._web_socket_server = None
 

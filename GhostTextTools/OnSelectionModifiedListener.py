@@ -9,25 +9,25 @@ class OnSelectionModifiedListener(EventListener):
     """
     Handles content changes, each changes gets send with the given web socket server to the client.
     """
+
     _bind_views = {}
     _disabled = set()
 
     def on_selection_modified(self, view):
         vid = view.id()
-        if (
-            vid not in OnSelectionModifiedListener._bind_views
-            or vid in self._disabled
-        ):
+        if vid not in OnSelectionModifiedListener._bind_views or vid in self._disabled:
             return
 
         changed_text = view.substr(sublime.Region(0, view.size()))
         selections = OnSelectionModifiedListener._get_selections(view)
-        response = json.dumps({
-            'title': view.name(),
-            'text':  changed_text,
-            'syntax': view.scope_name(0),
-            'selections': selections
-        })
+        response = json.dumps(
+            {
+                'title': view.name(),
+                'text': changed_text,
+                'syntax': view.scope_name(0),
+                'selections': selections,
+            }
+        )
 
         OnSelectionModifiedListener._bind_views[view.id()].send_message(response)
 
@@ -87,7 +87,11 @@ class OnSelectionModifiedListener(EventListener):
         """
         Unbinds a view specified by it's WebSocket server.
         """
-        view_id_to_unbind = OnSelectionModifiedListener.find_view_id_by_web_socket_server_id(web_socket_server)
+        view_id_to_unbind = (
+            OnSelectionModifiedListener.find_view_id_by_web_socket_server_id(
+                web_socket_server
+            )
+        )
 
         if view_id_to_unbind is not None:
             OnSelectionModifiedListener.unbind_view_by_id(view_id_to_unbind)
@@ -98,7 +102,10 @@ class OnSelectionModifiedListener(EventListener):
         Searches a view by the given WebSocket server or returns None.
         """
         for view_id in OnSelectionModifiedListener._bind_views:
-            if OnSelectionModifiedListener._bind_views[view_id].get_id() == web_socket_server.get_id():
+            if (
+                OnSelectionModifiedListener._bind_views[view_id].get_id()
+                == web_socket_server.get_id()
+            ):
                 return view_id
 
         return None
@@ -111,9 +118,6 @@ class OnSelectionModifiedListener(EventListener):
         selections = []
 
         for pos in view.sel():
-            selections.append({
-                'start': pos.begin(),
-                'end': pos.end()
-            })
+            selections.append({'start': pos.begin(), 'end': pos.end()})
 
         return selections

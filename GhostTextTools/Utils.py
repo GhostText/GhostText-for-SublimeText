@@ -2,7 +2,7 @@ import sublime
 import traceback
 
 
-class Utils():
+class Utils:
     """
     Loose collection of GhostText related utils for working with the Sublime Text API.
     """
@@ -23,7 +23,11 @@ class Utils():
             hint = ' - ' + hint
 
         if e:
-            sublime.status_message('GhostText{}: {}, {}, {}'.format(hint, message, str(e), traceback.format_exc()))
+            sublime.status_message(
+                'GhostText{}: {}, {}, {}'.format(
+                    hint, message, str(e), traceback.format_exc()
+                )
+            )
         else:
             sublime.status_message('GhostText{}: {}'.format(hint, message))
 
@@ -63,7 +67,9 @@ class Utils():
         """
         window = view.window()
         group_index, view_index = window.get_view_index(view)
-        window.run_command('close_by_index', {'group': group_index, 'index': view_index})
+        window.run_command(
+            'close_by_index', {'group': group_index, 'index': view_index}
+        )
         if len(sublime.windows()) > 1 and len(window.views()) is 0:
             window.run_command('close')
 
