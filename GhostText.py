@@ -4,6 +4,8 @@ __version__ = '0.2'
 __email__ = 'mail 64 cacodaemon 46 de'
 
 import sublime
+import http.server
+import socketserver
 from sublime import Window
 from sublime_plugin import TextCommand
 from sublime_plugin import EventListener
@@ -16,10 +18,6 @@ from .WebSocket.AbstractOnMessage import AbstractOnMessage
 from .GhostTextTools.OnSelectionModifiedListener import OnSelectionModifiedListener
 from .GhostTextTools.WindowHelper import WindowHelper
 from .GhostTextTools.Utils import Utils
-from .Http.HttpServer import HttpServer
-from .Http.AbstractOnRequest import AbstractOnRequest
-from .Http.Request import Request
-from .Http.Response import Response
 
 
 class WebSocketServerThread(Thread):
@@ -35,14 +33,8 @@ class WebSocketServerThread(Thread):
     def get_server(self):
         return self._server
 
-
-class OnRequest(AbstractOnRequest):
-    def __init__(self, settings):
-        self.new_window_on_connect = bool(settings.get('new_window_on_connect', False))
-        self.window_command_on_connect = str(settings.get('window_command_on_connect', 'focus_sublime_window'))
-        self._settings = settings
-
-    def on_request(self, request):
+class OnRequest(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
         if len(sublime.windows()) == 0 or self.new_window_on_connect:
             sublime.run_command('new_window')
 
@@ -57,27 +49,32 @@ class OnRequest(AbstractOnRequest):
         port = web_socket_server_thread.get_server().get_port()
         Utils.show_status('Connection opened')
 
-        return Response(json.dumps({"WebSocketPort": port, "ProtocolVersion": 1}),
-                        "200 OK",
-                        {'Content-Type': 'application/json'})
-
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps({"WebSocketPort": port, "ProtocolVersion": 1}).encode())
 
 class HttpStatusServerThread(Thread):
     def __init__(self, settings):
         super().__init__()
         server_port = int(settings.get('server_port', 4001))
-        self._server = HttpServer('localhost', server_port)
-        self._server.on_request(OnRequest(settings))
+
+        handler = OnRequest
+        handler._settings = settings
+        handler.new_window_on_connect = bool(settings.get('new_window_on_connect', False))
+        handler.window_command_on_connect = str(settings.get('window_command_on_connect', 'focus_sublime_window'))
+        self._server = socketserver.TCPServer(("", server_port), OnRequest)
+        Utils.show_status('Ready on port ' + str(server_port))
 
     def run(self):
         try:
-            self._server.start()
+            self._server.serve_forever()
         except OSError as e:
             Utils.show_error(e, 'HttpStatusServerThread')
             raise e
 
     def stop(self):
-        self._server.stop()
+        self._server.shutdown()
 
 
 class ReplaceContentCommand(TextCommand):
