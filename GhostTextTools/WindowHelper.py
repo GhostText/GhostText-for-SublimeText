@@ -13,7 +13,7 @@ class WindowHelper(sublime.Window):
         self._view_disconnected_prefix = Utils.get_view_prefix('disconnected')
         self._view_connected_prefix = Utils.get_view_prefix('connected')
 
-    def add_file(self, title, text):
+    def add_file(self, title, text, selections):
         """
         Creates a new file and adds the given text content to it.
         """
@@ -22,7 +22,7 @@ class WindowHelper(sublime.Window):
             '{} {}'.format(self._view_connected_prefix, os.path.splitext(title)[0])
         )
         view.set_status('title', title)
-        view.run_command('replace_content', {'text': text})
+        view.run_command('replace_content', {'text': text, 'selections': selections})
         view.set_scratch(True)
 
         return view
