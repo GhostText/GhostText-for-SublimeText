@@ -91,10 +91,17 @@ class ReplaceContentCommand(TextCommand):
     """
 
     def run(self, edit, **args):
-        self.view.replace(edit, sublime.Region(0, self.view.size()), args['text'])
+        # Temporarily disable conversion of tabs to spaces before
+        # pasting text, so that the selections stay valid
+        old_setting = self.view.settings().get('translate_tabs_to_spaces')
+        try:
+            self.view.settings().set('translate_tabs_to_spaces', False)
+            self.view.replace(edit, sublime.Region(0, self.view.size()), args['text'])
+        finally:
+            self.view.settings().set('translate_tabs_to_spaces', old_setting)
+
         text_length = len(args['text'])
         self.view.sel().clear()
-
         if 'selections' in args and len(args['selections']) > 0:
             selection = args['selections'][0]
             self.view.sel().add(sublime.Region(selection['start'], selection['end']))
@@ -112,7 +119,7 @@ class OnConnect(AbstractOnMessage):
             window_helper = WindowHelper()
             syntax = Utils.get_syntax_by_host(request['url'])
             current_view = window_helper.add_file(
-                request['title'] + '.' + syntax, request['text']
+                request['title'] + '.' + syntax, request['text'], request.get('selections')
             )
             OnSelectionModifiedListener.bind_view(current_view, self._web_socket_server)
             self._web_socket_server.on_message(OnMessage(self._settings, current_view))
