@@ -54,7 +54,7 @@ class Utils:
         """
         for window in sublime.windows():
             for view in window.views():
-                if view.id() is view_id:
+                if view.id() == view_id:
                     return view
 
         return None
@@ -70,7 +70,7 @@ class Utils:
         window.run_command(
             'close_by_index', {'group': group_index, 'index': view_index}
         )
-        if len(sublime.windows()) > 1 and len(window.views()) is 0:
+        if len(sublime.windows()) > 1 and len(window.views()) == 0:
             window.run_command('close')
 
     @staticmethod
